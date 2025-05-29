@@ -1,41 +1,4 @@
-const questions = [
-    {
-     question: "What is the capital of France?",
-        answers: [
-            { text: "Berlin", correct: false },
-            { text: "Madrid", correct: false },
-            { text: "Paris", correct: true },
-            { text: "Rome", correct: false }
-        ]
-   },
-   {
-        question: "What is the largest planet in our solar system?",
-        answers: [
-            { text: "Earth", correct: false },
-            { text: "Jupiter", correct: true },
-            { text: "Mars", correct: false },
-            { text: "Saturn", correct: false }
-        ]
-    },
-    {
-        question: "What is the chemical symbol for gold?",
-        answers: [
-            { text: "Au", correct: true },
-            { text: "Ag", correct: false },
-            { text: "Fe", correct: false },
-            { text: "Pb", correct: false }
-        ]
-   },
-    {
-        question: "Is Man United a mid club?",
-        answers: [
-            { text: "Absolutely Gba club!", correct: true },
-            { text: "They're trying", correct: false },
-            { text: "They're better than city", correct: false },
-            { text: "They will cook arsenal", correct: false }
-        ]
-    }
-];
+let questions = [];
 
 const questionElement = document.getElementById('question');
 const answerButtons = document.getElementById('answer-buttons');
@@ -48,6 +11,31 @@ function startQuiz(){
     score = 0;
     nextButton.innerHTML = 'Next';
     showQuestion();
+}
+
+async function fetchQuestions(){
+    try {
+        const response = await fetch('https://opentdb.com/api.php?amount=10&category=9');
+        const data = await response.json();
+        questions = data.results.map(q => ({
+            question: q.question,
+            answers: shuffle([
+                {text: q.correct_answer, correct: true},
+                ...q.incorrect_answers.map(ans => ({text: ans, correct:false}))
+            ])
+        }))
+        startQuiz();
+    } catch (error) {
+        console.error('Error fetching questions:', error);
+        questionElement.innerHTML = 'Ah there is error my guy!. Please try again later.';
+        answerButtons.style.display = 'none';
+        nextButton.style.display = 'none';
+        return;
+    }
+};
+
+function shuffle (array){
+    return array.sort(() => Math.random() - 0.5);
 }
 
 function showQuestion(){
@@ -118,5 +106,6 @@ nextButton.addEventListener('click', () => {
     }
 });
 
-startQuiz();
+// startQuiz();
 
+fetchQuestions();
