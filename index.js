@@ -1,5 +1,6 @@
 // so i changed this from const to let so that i can use it in my fetchQuestions function.
 let questions = [];
+let previousQuestions= [];
 
 // The variables
 const questionElement = document.getElementById('question');
@@ -26,12 +27,20 @@ async function fetchQuestions(){
                 {text: q.correct_answer, correct: true},
                 ...q.incorrect_answers.map(ans => ({text: ans, correct:false}))
             ])
-        }))
+        }));
+        // previous question is stored here
+        previousQuestions = questions.map(q => ({
+            question: q.question,
+            answers: q.answers.map(a => ({
+                text: a.text,
+                correct: a.correct
+            }))
+        }));
         // i call the startQuiz function here to start the quiz after fetching the questions
         startQuiz();
     } catch (error) {
         console.error('Error fetching questions:', error);
-        questionElement.innerHTML = 'Ah there is error my guy!. Please try again later.';
+        questionElement.innerHTML = 'Error. Please try again later.';
         // The answer button were displaying so i hid it when there is error
         answerButtons.style.display = 'none';
         nextButton.style.display = 'none';
@@ -71,6 +80,10 @@ function resetState(){
     while(answerButtons.firstChild){
         answerButtons.removeChild(answerButtons.firstChild);
     }
+    const replayBtn = document.getElementById('replay-btn');
+    if(replayBtn){
+        replayBtn.remove();
+    }
 }
 
 // This is just checking if answer is correct or not
@@ -95,7 +108,7 @@ function selectAnswer(event){
 // This function shows our score at the end.
 function showScore(){
     resetState();
-    questionElement.innerHTML = `You scored ${score} out of ${questions.length}!`;
+    questionElement.innerHTML = `You scored ${score} out of ${questions.length}, refresh for New Questions!`;
     nextButton.innerHTML = 'Play Again';
     nextButton.style.display = 'block';
 }
